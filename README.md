@@ -35,7 +35,7 @@ You can find the latest playable **Android APK** on the [Releases page](https://
 To download:
 1. Go to the [GitHub Releases](https://github.com/PilgrimArcheon/RedFox/releases) section.
 2. Look for the latest release.
-3. Download the file named `RedfoxWhackAMole.apk`.
+3. Download the file named `RedFox.apk`.
 4. Transfer it to your Android device and install (see installation guide below).
 
 ---
