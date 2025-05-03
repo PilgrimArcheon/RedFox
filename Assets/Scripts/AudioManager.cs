@@ -22,14 +22,14 @@ public class AudioManager : MonoBehaviour
     public void MenuBGAudio()
     {
         audioSource.clip = menuBGAudio;
-        audioSource.volume = 0.75f;
+        audioSource.volume = 0.25f;
         audioSource.Play();
     }
 
     public void GameBGAudio()
     {
         audioSource.clip = gameBGAudio;
-        audioSource.volume = 0.35f;
+        audioSource.volume = 0.2f;
         audioSource.Play();
     }
 }

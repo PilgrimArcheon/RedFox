@@ -34,13 +34,13 @@ public class MenuManager : MonoBehaviour
 
     public void ConfirmHealth()
     {
-        if (NetworkManager.Instance.livesLeft != 0) 
+        if (NetworkManager.Instance.livesLeft > 0) 
         { 
-            MenuManager.Instance.OpenMenu("game");
+            OpenMenu("game");
             gamePlayManager.SetActive(true);
             GameplayManager.Instance.SetUpNewGame();
         }
-        else MenuManager.Instance.OpenMenu("noLivesLeft");
+        else OpenMenu("noLivesLeft");
     }
 
     public void OpenMenu(Menu menu)//Confirm Menu Opened
@@ -90,8 +90,8 @@ public class MenuManager : MonoBehaviour
         Application.Quit();
     }
 
-    public void SetRectVertPos()
+    public void SetRectVertPos(float posY)
     {
-        taskSpecificContent.position = new Vector3(taskSpecificContent.position.x, 2530f, taskSpecificContent.position.z);
+        taskSpecificContent.position = new Vector3(taskSpecificContent.position.x, posY, taskSpecificContent.position.z);
     }
 }

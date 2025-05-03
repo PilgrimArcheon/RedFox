@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 
 [System.Serializable]
-public class PlayerData 
+public class PlayerData
 {
     public string player;
     public int score;
@@ -30,8 +30,11 @@ public class LeaderboardManager : MonoBehaviour
         scoreBoardData.Clear();
         foreach (Transform item in scoreBoardHolder) Destroy(item.gameObject);
 
-        StartCoroutine(NetworkManager.Instance.GetLeaderboardInfo(this));
-        StartCoroutine(NetworkManager.Instance.GetPlayerInfo(this));
+        if (NetworkManager.Instance.IsLoggedIn)
+        {
+            StartCoroutine(NetworkManager.Instance.GetLeaderboardInfo(this));
+            StartCoroutine(NetworkManager.Instance.GetPlayerInfo(this));
+        }
     }
 
     public void UpdateLeaderBoard()
@@ -39,16 +42,16 @@ public class LeaderboardManager : MonoBehaviour
         loadingIndicator.SetActive(false);
         foreach (PlayerData _playerData in scoreBoardData)
         {
-            if(_playerData.position > 3) 
+            if (_playerData.position > 3)
             {
                 PlayerDataUI _playerDataUI = Instantiate(playerDataListUIPrefab, scoreBoardHolder).GetComponent<PlayerDataUI>();
                 GetPlayerData(_playerDataUI, _playerData.player, _playerData.position.ToString(), _playerData.score.ToString());
             }
             else
             {
-                if(_playerData.position == 1) GetPlayerData(firstPos, _playerData.player, (_playerData.position.ToString()+"st"), _playerData.score.ToString());
-                else if (_playerData.position == 2) GetPlayerData(secondPos, _playerData.player, (_playerData.position.ToString()+"nd"), _playerData.score.ToString());
-                else if (_playerData.position == 3) GetPlayerData(thirdPos, _playerData.player, (_playerData.position.ToString()+"rd"), _playerData.score.ToString());
+                if (_playerData.position == 1) GetPlayerData(firstPos, _playerData.player, (_playerData.position.ToString() + "st"), _playerData.score.ToString());
+                else if (_playerData.position == 2) GetPlayerData(secondPos, _playerData.player, (_playerData.position.ToString() + "nd"), _playerData.score.ToString());
+                else if (_playerData.position == 3) GetPlayerData(thirdPos, _playerData.player, (_playerData.position.ToString() + "rd"), _playerData.score.ToString());
             }
         }
     }
@@ -56,7 +59,7 @@ public class LeaderboardManager : MonoBehaviour
     public void GetPlayerData(PlayerDataUI dataUI, string player, string position, string score)
     {
         dataUI.nameText.text = player;
-        dataUI.positionText.text = position+".";
+        dataUI.positionText.text = position + ".";
         dataUI.scoreText.text = score;
     }
 
@@ -71,24 +74,24 @@ public class LeaderboardManager : MonoBehaviour
     {
         if (num <= 0) return num.ToString();
 
-        switch (num % 100)  
-        {  
-            case 11:  
-            case 12:  
-            case 13:  
-                return num + "th";  
-        }  
+        switch (num % 100)
+        {
+            case 11:
+            case 12:
+            case 13:
+                return num + "th";
+        }
 
-        switch (num % 10)  
-        {  
-            case 1:  
-                return num + "st";  
-            case 2:  
-                return num + "nd";  
-            case 3:  
-                return num + "rd";  
-            default:  
-                return num + "th";  
-        } 
+        switch (num % 10)
+        {
+            case 1:
+                return num + "st";
+            case 2:
+                return num + "nd";
+            case 3:
+                return num + "rd";
+            default:
+                return num + "th";
+        }
     }
 }

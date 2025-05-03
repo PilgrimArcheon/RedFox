@@ -7,7 +7,7 @@ public class GameplayManager : MonoBehaviour
 {
     public static GameplayManager Instance;
     [Header("General")]
-    [SerializeField] private Bunny_Egg[] bunnyEggPrefab;
+    [SerializeField] private Whackable[] whackablePrefab;
     [SerializeField] private Transform[] spawnPoints;
     [SerializeField] private int[] whackValues;
     [SerializeField] private int[] missValues;
@@ -18,20 +18,20 @@ public class GameplayManager : MonoBehaviour
     [Header("GameTime")]
     [SerializeField] private float maxGameTime;
     private float currentGameTime;
-    private float timeBtwSpawns; 
+    private float timeBtwSpawns;
     [Header("UI")]
     [SerializeField] private Text timeText;
     [SerializeField] private Text playerGamePointText;
-    
+
     [Header("GameData")]
-    public Dictionary<BunnyType, int> whackValue = new Dictionary<BunnyType, int>();
-    public Dictionary<BunnyType, int> missValue = new Dictionary<BunnyType, int>();
+    public Dictionary<FoxType, int> whackValue = new Dictionary<FoxType, int>();
+    public Dictionary<FoxType, int> missValue = new Dictionary<FoxType, int>();
     public bool gameStarted, canSpawn;
     int currentSpawnPointID = -1;
 
     void Awake()
     {
-        if(Instance) Destroy(gameObject);
+        if (Instance) Destroy(gameObject);
         else Instance = this;
         SetUpNewGame();
     }
@@ -55,23 +55,23 @@ public class GameplayManager : MonoBehaviour
     void SetWhackValue()
     {
         whackValue.Clear();
-        whackValue = new Dictionary<BunnyType, int>()
+        whackValue = new Dictionary<FoxType, int>()
         {
-            {BunnyType.EasterEgg, whackValues[(int)BunnyType.EasterEgg]},
-            {BunnyType.BunnyWithHat, whackValues[(int)BunnyType.BunnyWithHat]},
-            {BunnyType.BabyBlob, whackValues[(int)BunnyType.BabyBlob]}
+            {FoxType.Fox, whackValues[(int)FoxType.Fox]},
+            {FoxType.TreasureChest, whackValues[(int)FoxType.TreasureChest]},
+            {FoxType.Racoon, whackValues[(int)FoxType.Racoon]}
         };
     }
-    
+
     //Set up Dictionary Data for MissedValues GameStart
     void SetMissValue()
     {
         missValue.Clear();
-        missValue = new Dictionary<BunnyType, int>()
+        missValue = new Dictionary<FoxType, int>()
         {
-            {BunnyType.EasterEgg, missValues[(int)BunnyType.EasterEgg]},
-            {BunnyType.BunnyWithHat, missValues[(int)BunnyType.BunnyWithHat]},
-            {BunnyType.BabyBlob, missValues[(int)BunnyType.BabyBlob]}
+            {FoxType.Fox, missValues[(int)FoxType.Fox]},
+            {FoxType.TreasureChest, missValues[(int)FoxType.TreasureChest]},
+            {FoxType.Racoon, missValues[(int)FoxType.Racoon]}
         };
     }
     public int spawnTimeChecker;
@@ -79,13 +79,13 @@ public class GameplayManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(canSpawn) CheckSpawnBunny_Eggs();
+        if (canSpawn) CheckSpawnBunny_Eggs();
         GetInput();
-        if(currentGameTime >= 0 && gameStarted) UpdateGameTime();
+        if (currentGameTime >= 0 && gameStarted) UpdateGameTime();
         else GameOver();
         UpdateUI();
         spawnTimeChecker = (int)currentGameTime % 10;
-        if(spawnTimeChecker == 0 && !changedSpawnTime && spawnTime > 0.75f)
+        if (spawnTimeChecker == 0 && !changedSpawnTime && spawnTime > 0.75f)
         {
             spawnTime -= 0.25f;
             changedSpawnTime = true;
@@ -97,15 +97,15 @@ public class GameplayManager : MonoBehaviour
 
     void GetInput()
     {
-        if((Input.GetMouseButtonDown(0)))
+        if ((Input.GetMouseButtonDown(0)))
         {
             Vector2 mousePos = Input.mousePosition;
             Vector2 touchPosition = Camera.main.ScreenToWorldPoint(mousePos);
 
             Collider2D collider = Physics2D.OverlapPoint(touchPosition);
-            if(collider)
+            if (collider)
             {
-                if(collider.GetComponent<Bunny_Egg>()) collider.GetComponent<Bunny_Egg>().Whack();
+                if (collider.GetComponent<Whackable>()) collider.GetComponent<Whackable>().Whack();
             }
         }
     }
@@ -120,8 +120,9 @@ public class GameplayManager : MonoBehaviour
         gameStarted = false;
         canSpawn = false;
         GetRidOfRemainingBunnies();
-        resultInfo.text = $"You earned {playerPoint} points.";
-        NetworkManager.Instance.AddScore(playerPoint);
+        resultInfo.text = $"{playerPoint}";
+        if (NetworkManager.Instance.IsLoggedIn) 
+            NetworkManager.Instance.AddScore(playerPoint);
         MenuManager.Instance.OpenMenu("gameEnd");
         AudioManager.Instance.MenuBGAudio();
         gameObject.SetActive(false);
@@ -131,7 +132,7 @@ public class GameplayManager : MonoBehaviour
     {
         foreach (var trans in spawnPoints)
         {
-            if(trans.childCount != 0)
+            if (trans.childCount != 0)
             {
                 Destroy(trans.GetChild(0).gameObject);
             }
@@ -142,13 +143,13 @@ public class GameplayManager : MonoBehaviour
     {
         if (timeBtwSpawns <= 0)
         {
-            if(currentGameTime > 55f || currentGameTime < 10f) rndSpawnNum = 1;
-            else rndSpawnNum = Random.Range(1, 3); 
+            if (currentGameTime > 55f || currentGameTime < 10f) rndSpawnNum = 1;
+            else rndSpawnNum = Random.Range(1, 3);
             for (int i = 0; i < rndSpawnNum; i++)
             {
                 Spawn();
             }
-            timeBtwSpawns = spawnTime;        
+            timeBtwSpawns = spawnTime;
         }
         else
             timeBtwSpawns -= Time.deltaTime;//Reduce Shoot Time
@@ -156,21 +157,21 @@ public class GameplayManager : MonoBehaviour
 
     void Spawn()
     {
-        int rndSpawnId = Random.Range(0, bunnyEggPrefab.Length); 
+        int rndSpawnId = Random.Range(0, whackablePrefab.Length);
         int rndSpawnPoint = Random.Range(0, spawnPoints.Length);
-        if(spawnPoints[rndSpawnPoint].childCount == 0) currentSpawnPointID = rndSpawnPoint;
-        else 
+        if (spawnPoints[rndSpawnPoint].childCount == 0) currentSpawnPointID = rndSpawnPoint;
+        else
         {
-            Spawn(); 
+            Spawn();
             return;
         }
-        Transform go = Instantiate(bunnyEggPrefab[rndSpawnId], spawnPoints[rndSpawnPoint].position, Quaternion.identity).transform;
+        Transform go = Instantiate(whackablePrefab[rndSpawnId], spawnPoints[rndSpawnPoint].position, Quaternion.identity).transform;
         go.parent = spawnPoints[rndSpawnPoint];
     }
 
     void UpdateUI()
     {
-        if(playerPoint < 0) playerPoint = 0;
+        if (playerPoint < 0) playerPoint = 0;
         timeText.text = currentGameTime.ToString("00");
         playerGamePointText.text = playerPoint.ToString("00");
     }
